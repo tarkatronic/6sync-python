@@ -22,14 +22,14 @@ class APIRequest(urllib2.Request):
 
 
 class APIHandler:
-    """This object will handle all methods associated with the 6sync RESTful DNS API.
+    """This object will handle all methods associated with the 6sync RESTful API.
     Before any calls can be made to the API, you must provide both your API key and
     secret. This can be done via positional or keyword arguments, or through direct
     property assignment. i.e.:
     
-    >>> api = DNSHandler('my_api_key', 'my_api_secret') # Positional arguments
-    >>> api = DNSHandler(api_key='my_api_key', api_secret='my_api_secret') # Keyword arguments
-    >>> api = DNSHandler()
+    >>> api = APIHandler('my_api_key', 'my_api_secret') # Positional arguments
+    >>> api = APIHandler(api_key='my_api_key', api_secret='my_api_secret') # Keyword arguments
+    >>> api = APIHandler()
     >>> api.api_key = 'my_api_key' # Property assignment
     >>> api.api_secret = 'my_api_secret'
     """
