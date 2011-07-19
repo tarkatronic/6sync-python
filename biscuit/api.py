@@ -61,6 +61,7 @@ class APIHandler:
         request.add_header('Authorization', auth)
         request.add_header('Content-Type', 'application/json')
         resp = self.opener.open(request)
+        
         return json.loads(resp.read())
     
     base_uri = property(lambda self: '%s%s/' % (self.api_uri, self.api_version))
@@ -96,7 +97,11 @@ class APIHandler:
     def domain_delete(self, zone_id):
         """Delete an individual DNS zone from your account
         WARNING: This method is destructive. That which has been done can not be undone."""
-        pass
+        try:
+            uri = 'zones/%d/' % zone_id
+        except TypeError:
+            raise TypeError, "zone_id must be an integer"
+        return self._api_request(uri, method='DELETE')
     
     def domain_create(self, origin, description='No description set!'):
         """Create a new DNS zone tied to your account"""
