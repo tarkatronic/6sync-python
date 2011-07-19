@@ -1,3 +1,4 @@
+import base64
 import urllib2
 
 try:
@@ -17,7 +18,7 @@ class APIRequest(urllib2.Request):
     def get_method(self):
         if self._method:
             return self._method
-        return super(APIRequest, self).get_method()
+        return  super(APIRequest, self).get_method()
 
 
 class APIHandler:
@@ -38,25 +39,27 @@ class APIHandler:
     api_version = 'trunk'
     
     # Don't instantiate these until we need them
-    def _get_auth_handler(self):
-        if not hasattr(self, '_auth_handler'):
-            if not self.api_key or not self.api_secret:
-                raise TypeError, "Both api_key and api_secret must be set before a connection be established"
-            self._auth_handler = urllib2.HTTPBasicAuthHandler(urllib2.HTTPPasswordMgrWithDefaultRealm())
-            self._auth_handler.add_password(realm=None, uri=self.base_uri, user=self.api_key, passwd=self.api_secret)
-        return self._auth_handler
-    auth_handler = property(_get_auth_handler)
-    
     def _get_opener(self):
         if not hasattr(self, '_url_opener'):
-            self._url_opener = urllib2.build_opener(self.auth_handler)
+            self._url_opener = urllib2.build_opener(urllib2.HTTPSHandler())
+            for handler in self._url_opener.handlers: 
+                try:
+                    handler.set_http_debuglevel(1)
+                except:
+                    pass
         return self._url_opener
     opener = property(_get_opener)
     
     
     def _api_request(self, uri, method='GET', data=None):
         uri = '%s%s' % (self.base_uri, uri)
+        # We're going to let potential JSON encoding errors just pass right through
+        if data is not None:
+            data = unicode(json.dumps(data))
         request = APIRequest(uri, data=data, method=method)
+        auth = 'Basic %s' % base64.encodestring('%s:%s' % (self.api_key, self.api_secret))
+        request.add_header('Authorization', auth)
+        request.add_header('Content-Type', 'application/json')
         resp = self.opener.open(request)
         return json.loads(resp.read())
     
@@ -95,9 +98,11 @@ class APIHandler:
         WARNING: This method is destructive. That which has been done can not be undone."""
         pass
     
-    def domain_create(self, origin, description=None):
+    def domain_create(self, origin, description='No description set!'):
         """Create a new DNS zone tied to your account"""
-        pass
+        if not isinstance(origin, basestring) or not isinstance(description, basestring):
+            raise TypeError, "origin and description must both be strings"
+        return self._api_request('zones/', method='POST', data={'origin':origin, 'description': description})
     
     def domain_resource_list(self, zone_id):
         """Retrieve a list of all records associated with an individual zone
