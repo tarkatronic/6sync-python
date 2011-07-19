@@ -1,4 +1,3 @@
-import base64
 import urllib2
 
 try:
@@ -85,7 +84,11 @@ class APIHandler:
     
     def domain_info(self, zone_id):
         """Retrieve information on an individual DNS zone from your account"""
-        pass
+        try:
+            uri = 'zones/%d/' % zone_id
+        except TypeError:
+            raise TypeError, "zone_id must be an integer"
+        return self._api_request(uri)
     
     def domain_delete(self, zone_id):
         """Delete an individual DNS zone from your account
@@ -99,11 +102,19 @@ class APIHandler:
     def domain_resource_list(self, zone_id):
         """Retrieve a list of all records associated with an individual zone
         tied to your account"""
-        pass
+        try:
+            uri = 'zones/%d/records/' % zone_id
+        except TypeError:
+            raise TypeError, "zone_id must be an integer"
+        return self._api_request(uri)
     
     def domain_resource_info(self, zone_id, record_id):
         """Retrieve information on an individual record tied to one of your DNS zones"""
-        pass
+        try:
+            uri = 'zones/%d/records/%d/' % (zone_id, record_id)
+        except TypeError:
+            raise TypeError, "zone_id and record_id must both be integers"
+        return self._api_request(uri)
     
     def domain_resource_delete(self, zone_id, record_id):
         """Delete an individual record from one of your DNS zones
