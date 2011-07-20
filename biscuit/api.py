@@ -56,7 +56,10 @@ class APIHandler:
         request.add_header('Authorization', auth)
         request.add_header('Content-Type', 'application/json')
         resp = self.opener.open(request)
-        return json.loads(resp.read())
+        if resp.code == 204:
+            return True # 204 No Content; return True so the user knows it succeeded
+        else:
+            return json.loads(resp.read())
     
     base_uri = property(lambda self: '%s%s/' % (self.api_uri, self.api_version))
     
