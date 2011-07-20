@@ -73,7 +73,6 @@ class APIHandler:
         self.debug = bool(debug)
     
     
-    # NOTE: In all cases, existing object not on your account return 401 Unauthorized; nonexistent objects return 404 Not Found
     def domain_list(self):
         """Retrieve a list of all DNS zones you currently have in your account.
         Returns a list of dictionaries containing all of your zone records.
