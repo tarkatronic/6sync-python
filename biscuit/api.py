@@ -126,10 +126,22 @@ class APIHandler:
     def domain_resource_delete(self, zone_id, record_id):
         """Delete an individual record from one of your DNS zones
         WARNING: This method is destructive. That which has been done can not be undone."""
-        pass
+        try:
+            uri = 'zones/%d/records/%d/' % (zone_id, record_id)
+        except TypeError:
+            raise TypeError, "zone_id and record_id must both be integers"
+        return self._api_request(uri, method='DELETE')
     
-    def domain_resource_create(self, zone_id, name, type, data, aux=None):
+    def domain_resource_create(self, zone_id, name, rrtype, data, aux=''):
         """Create a new record to one of your DNS zones"""
-        pass
+        try:
+            uri = 'zones/%d/records/' % zone_id
+        except TypeError:
+            raise TypeError, "zone_id must be an integer"
+        if not isinstance(name, basestring) or not isinstance(rrtype, basestring) \
+            or not isinstance(data, basestring) or not isinstance(aux, basestring):
+            raise TypeError, "name, rrtype, data and aux must all be strings"
+        return self._api_request(uri, method='POST',
+            data={'name': name, 'type': rrtype, 'data': data, 'aux': aux})
 
 
