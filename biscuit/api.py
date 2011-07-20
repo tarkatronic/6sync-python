@@ -38,15 +38,10 @@ class APIHandler:
     api_uri = 'https://biscuit.6sync.com/api/'
     api_version = 'trunk'
     
-    # Don't instantiate these until we need them
+    # Don't instantiate this until we need it
     def _get_opener(self):
         if not hasattr(self, '_url_opener'):
-            self._url_opener = urllib2.build_opener(urllib2.HTTPSHandler())
-            for handler in self._url_opener.handlers: 
-                try:
-                    handler.set_http_debuglevel(1)
-                except:
-                    pass
+            self._url_opener = urllib2.build_opener(urllib2.HTTPSHandler(debuglevel=int(bool(self.debug))))
         return self._url_opener
     opener = property(_get_opener)
     
@@ -55,24 +50,24 @@ class APIHandler:
         uri = '%s%s' % (self.base_uri, uri)
         # We're going to let potential JSON encoding errors just pass right through
         if data is not None:
-            data = unicode(json.dumps(data))
+            data = json.dumps(data)
         request = APIRequest(uri, data=data, method=method)
         auth = 'Basic %s' % base64.encodestring('%s:%s' % (self.api_key, self.api_secret))
         request.add_header('Authorization', auth)
         request.add_header('Content-Type', 'application/json')
         resp = self.opener.open(request)
-        
         return json.loads(resp.read())
     
     base_uri = property(lambda self: '%s%s/' % (self.api_uri, self.api_version))
     
     
-    def __init__(self, api_key=None, api_secret=None):
+    def __init__(self, api_key=None, api_secret=None, debug=False):
         if not ((api_key is None or isinstance(api_key, basestring)) and
                 (api_secret is None or isinstance(api_secret, basestring))):
             raise TypeError, "api_key and api_secret must both be strings"
         self.api_key = api_key
         self.api_secret = api_secret
+        self.debug = bool(debug)
     
     
     # NOTE: In all cases, existing object not on your account return 401 Unauthorized; nonexistent objects return 404 Not Found
