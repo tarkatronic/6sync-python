@@ -52,7 +52,7 @@ class APIHandler:
         if data is not None:
             data = json.dumps(data)
         request = APIRequest(uri, data=data, method=method)
-        auth = 'Basic %s' % base64.encodestring('%s:%s' % (self.api_key, self.api_secret)).replace('\n', '')
+        auth = 'Basic %s' % base64.encodestring('%s:%s' % (self.api_key, self.api_secret)).strip()
         request.add_header('Authorization', auth)
         request.add_header('Content-Type', 'application/json')
         resp = self.opener.open(request)
