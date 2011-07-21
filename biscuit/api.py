@@ -132,16 +132,24 @@ class APIHandler:
             raise TypeError, "zone_id and record_id must both be integers"
         return self._api_request(uri, method='DELETE')
     
-    def domain_resource_create(self, zone_id, name, rrtype, data, aux=''):
-        """Create a new record to one of your DNS zones"""
+    def domain_resource_create(self, zone_id, name, rrtype, data, aux=0):
+        """Create a new resource record tied to one of your DNS zones. All fields
+        are required, but where appropriate (or necessary) can be empty strings.
+        Allowed record types: A, AAAA, ALIAS, CNAME, HINFO, MX, NS, PTR, RP, SRV, TXT"""
         try:
             uri = 'zones/%d/records/' % zone_id
         except TypeError:
             raise TypeError, "zone_id must be an integer"
-        if not isinstance(name, basestring) or not isinstance(rrtype, basestring) \
-            or not isinstance(data, basestring) or not isinstance(aux, basestring):
+        if not isinstance(name, basestring) or not isinstance(rrtype, basestring) or not isinstance(data, basestring):
             raise TypeError, "name, rrtype, data and aux must all be strings"
+        try:
+            aux = int(aux)
+        except ValueError:
+            raise TypeError, "aux must be an integer"
+        allowed_types = ('A','AAAA','ALIAS','CNAME','HINFO','MX','NS','PTR','RP','SRV','TXT')
+        if rrtype.upper() not in allowed_types:
+            raise ValueError, "rrtype must be one of: %s" % ', '.join(allowed_types)
         return self._api_request(uri, method='POST',
-            data={'name': name, 'type': rrtype, 'data': data, 'aux': aux})
+            data={'name': name, 'type': rrtype.upper(), 'data': data, 'aux': aux})
 
 
